@@ -16,7 +16,7 @@ public class SphericalGeodesic : MonoBehaviour
     {
         LineRenderer geodesic = gameObject.AddComponent<LineRenderer>();
         geodesic.widthMultiplier = 0.1f;
-        geodesic.positionCount = lengthOfLineRenderer * 3;
+        geodesic.positionCount = lengthOfLineRenderer - 1;
     }
 
     void Update()
@@ -32,7 +32,7 @@ public class SphericalGeodesic : MonoBehaviour
             Mathf.Cos(phi2),
             Mathf.Sin(phi2) * Mathf.Sin(theta2));
 
-        Vector3 w1 = Vector3.Cross(Vector3.Cross(v1, v2), v1).normalized;
+        Vector3 w1 = v2 - Vector3.Dot(v1, v2) / Vector3.Dot(v1, v1) * v1;
 
         float angleBetween1 = Mathf.Acos(Vector3.Dot(v1, v2));
 

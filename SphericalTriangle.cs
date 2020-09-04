@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,7 +18,7 @@ public class SphericalTriangle : MonoBehaviour
     {
         LineRenderer triangle = gameObject.AddComponent<LineRenderer>();
         triangle.widthMultiplier = 0.1f;
-        triangle.positionCount = lengthOfLineRenderer * 3;
+        triangle.positionCount = lengthOfLineRenderer * 3 - 2;
     }
 
     void Update()
@@ -38,9 +38,9 @@ public class SphericalTriangle : MonoBehaviour
             Mathf.Cos(phi3),
             Mathf.Sin(phi3) * Mathf.Sin(theta3));
 
-        Vector3 w1 = Vector3.Cross(Vector3.Cross(v1, v2), v1).normalized;
-        Vector3 w2 = Vector3.Cross(Vector3.Cross(v2, v3), v2).normalized;
-        Vector3 w3 = Vector3.Cross(Vector3.Cross(v3, v1), v3).normalized;
+        Vector3 w1 = v2 - Vector3.Dot(v1, v2) / Vector3.Dot(v1, v1) * v1;
+        Vector3 w2 = v3 - Vector3.Dot(v2, v3) / Vector3.Dot(v2, v2) * v2;
+        Vector3 w3 = v1 - Vector3.Dot(v3, v1) / Vector3.Dot(v3, v3) * v3;
 
         float angleBetween1 = Mathf.Acos(Vector3.Dot(v1, v2));
         float angleBetween2 = Mathf.Acos(Vector3.Dot(v2, v3));
@@ -55,12 +55,14 @@ public class SphericalTriangle : MonoBehaviour
         for (int i = 1; i < lengthOfLineRenderer; i++)
         {
             float angle_i = i * angleBetween2 / (lengthOfLineRenderer - 1);
-            points[i + 1000] = rho * (Mathf.Sin(angle_i) * w2 + Mathf.Cos(angle_i) * v2);
+            points[i + lengthOfLineRenderer - 1] =
+                rho * (Mathf.Sin(angle_i) * w2 + Mathf.Cos(angle_i) * v2);
         }
         for (int i = 1; i < lengthOfLineRenderer; i++)
         {
             float angle_i = i * angleBetween3 / (lengthOfLineRenderer - 1);
-            points[i + 2000] = rho * (Mathf.Sin(angle_i) * w3 + Mathf.Cos(angle_i) * v3);
+            points[i + 2 * lengthOfLineRenderer - 2] =
+                rho * (Mathf.Sin(angle_i) * w3 + Mathf.Cos(angle_i) * v3);
         }
         triangle.SetPositions(points);
     }
