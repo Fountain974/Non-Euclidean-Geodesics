@@ -6,17 +6,19 @@ public class SphericalGeodesic : MonoBehaviour
 {
     // set endpoints in spherical coordinates
     public float rho = 1.0f; // radius/scaling factor
-    public float theta1 = 0.0f; // azimuthal angle
-    public float phi1 = 0.0f; // angle of elevation
-    public float theta2 = 0.0f;
-    public float phi2 = Mathf.PI / 2;
+    public float ntheta1 = 0.0f; // azimuthal angle/pi
+    public float nphi1 = 0.0f; // angle of elevation/pi
+    public float ntheta2 = 0.0f;
+    public float nphi2 = 0.5f;
+
     public int lengthOfLineRenderer = 1000;
+    public float widthMultiplier = .05f;
 
     void Start()
     {
         LineRenderer geodesic = gameObject.AddComponent<LineRenderer>();
-        geodesic.widthMultiplier = 0.1f;
-        geodesic.positionCount = lengthOfLineRenderer - 1;
+        geodesic.widthMultiplier = widthMultiplier;
+        geodesic.positionCount = lengthOfLineRenderer;
     }
 
     void Update()
@@ -24,26 +26,24 @@ public class SphericalGeodesic : MonoBehaviour
         LineRenderer geodesic = gameObject.GetComponent<LineRenderer>();
 
         Vector3 v1 = new Vector3(
-            Mathf.Sin(phi1) * Mathf.Cos(theta1),
-            Mathf.Cos(phi1),
-            Mathf.Sin(phi1) * Mathf.Sin(theta1));
+            Mathf.Sin(nphi1 * Mathf.PI) * Mathf.Cos(ntheta1 * Mathf.PI),
+            Mathf.Cos(nphi1 * Mathf.PI),
+            Mathf.Sin(nphi1 * Mathf.PI) * Mathf.Sin(ntheta1 * Mathf.PI));
         Vector3 v2 = new Vector3(
-            Mathf.Sin(phi2) * Mathf.Cos(theta2),
-            Mathf.Cos(phi2),
-            Mathf.Sin(phi2) * Mathf.Sin(theta2));
+            Mathf.Sin(nphi2 * Mathf.PI) * Mathf.Cos(ntheta2 * Mathf.PI),
+            Mathf.Cos(nphi2 * Mathf.PI),
+            Mathf.Sin(nphi2 * Mathf.PI) * Mathf.Sin(ntheta2 * Mathf.PI));
 
-        Vector3 w1 = v2 - Vector3.Dot(v1, v2) / Vector3.Dot(v1, v1) * v1;
+        Vector3 w = (v2 - Vector3.Dot(v1, v2) * v1).normalized;
 
-        float angleBetween1 = Mathf.Acos(Vector3.Dot(v1, v2));
+        float angleBetween = Mathf.Acos(Vector3.Dot(v1, v2));
 
         var points = new Vector3[lengthOfLineRenderer];
         for (int i = 0; i < lengthOfLineRenderer; i++)
         {
-            float angle_i = i * angleBetween1 / (lengthOfLineRenderer - 1);
-            points[i] = rho * (Mathf.Sin(angle_i) * w1 + Mathf.Cos(angle_i) * v1);
+            float angle_i = i * angleBetween / (lengthOfLineRenderer - 1);
+            points[i] = rho * (Mathf.Sin(angle_i) * w + Mathf.Cos(angle_i) * v1);
         }
         geodesic.SetPositions(points);
     }
-
-
 }
