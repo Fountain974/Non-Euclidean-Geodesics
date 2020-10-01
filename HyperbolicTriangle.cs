@@ -20,6 +20,12 @@ public class HyperbolicTriangle : MonoBehaviour
     public int lengthPerLine = 1000;
     public float widthMultiplier = .05f;
 
+    void Awake()
+    {
+        QualitySettings.vSyncCount = 0;  // VSync must be disabled
+        Application.targetFrameRate = 10;
+    }
+
     void Start()
     {
         LineRenderer triangle = gameObject.AddComponent<LineRenderer>();
@@ -50,7 +56,7 @@ public class HyperbolicTriangle : MonoBehaviour
 
         var points = new Vector3[3 * lengthPerLine];
 
-        if (angle1 == 0 | angle1 == Mathf.PI)
+        if (angle1 == 0 | angle1 == Mathf.PI | rho1 == 0 | rho2 == 0)
         {
             for (int i = 0; i < lengthPerLine; i++)
             {
@@ -61,13 +67,12 @@ public class HyperbolicTriangle : MonoBehaviour
         }
         else
         {
-            Vector3 mid12 = (v1 + v2) / 2; //midpoint of p and q
-            Vector3 orth1 = (mid12 - Vector3.Project(mid12, v1)).normalized; // vector normal to p in plane
-            float mid1 = 0.5f * (1 + Mathf.Pow(v1.magnitude, -2));//Midpoint of p and inversion of p
-            float mid2 = 0.5f * (1 + Mathf.Pow(v2.magnitude, -2));
-            float orthLength = Mathf.Abs(mid2 - mid1 * Mathf.Cos(angle1)) / Mathf.Sin(angle1);
+            Vector3 orth1 = (v2 - Vector3.Project(v2, v1)).normalized; // vector normal to p in plane
+            float mid1 = (1 + Mathf.Pow(rho1, 2)) / (rho1 * 2);//Midpoint of p and inversion of p
+            float mid2 = (1 + Mathf.Pow(v2.magnitude, 2)) / (rho2 * 2);
+            float orthLength1 = mid2 / Mathf.Sin(angle1) - mid1 / Mathf.Tan(angle1);
 
-            Vector3 center = mid1 * v1 + orthLength * orth1;
+            Vector3 center = mid1 * v1.normalized + orthLength1 * orth1;
             float newAngle = Mathf.Acos(Vector3.Dot((center - v1).normalized, (center - v2).normalized)); // angle between cp and cq
             float rad = (center - v1).magnitude;
             Vector3 cos = (center - v1).normalized;
@@ -75,14 +80,14 @@ public class HyperbolicTriangle : MonoBehaviour
 
             for (int i = 0; i < lengthPerLine; i++)
             {
-                //float angle_i = i * newAngle / (lengthPerLine - 1);
-                float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
+                float angle_i = i * newAngle / (lengthPerLine - 1);
+                //float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
                 Vector3 point_i = center - rad * (Mathf.Cos(angle_i) * cos + Mathf.Sin(angle_i) * sin);
                 points[i] = point_i;
             }
         }
 
-        if (angle2 == 0 | angle2 == Mathf.PI)
+        if (angle2 == 0 | angle2 == Mathf.PI | rho2 == 0 | rho3 == 0)
         {
             for (int i = 0; i < lengthPerLine; i++)
             {
@@ -93,13 +98,12 @@ public class HyperbolicTriangle : MonoBehaviour
         }
         else
         {
-            Vector3 mid23 = (v2 + v3) / 2; //midpoint of p and q
-            Vector3 orth2 = (mid23 - Vector3.Project(mid23, v2)).normalized; // vector normal to p in plane
-            float mid2 = 0.5f * (1 + Mathf.Pow(v2.magnitude, -2));//Midpoint of p and inversion of p
-            float mid3 = 0.5f * (1 + Mathf.Pow(v3.magnitude, -2));
-            float orthLength = Mathf.Abs(mid3 - mid2 * Mathf.Cos(angle2)) / Mathf.Sin(angle2);
+            Vector3 orth2 = (v3 - Vector3.Project(v3, v2)).normalized; // vector normal to p in plane
+            float mid2 = (1 + Mathf.Pow(rho2, 2)) / (rho2 * 2);//Midpoint of p and inversion of p
+            float mid3 = (1 + Mathf.Pow(rho3, 2)) / (rho3 * 2);
+            float orthLength2 = mid3 / Mathf.Sin(angle2) - mid2 / Mathf.Tan(angle2);
 
-            Vector3 center = mid2 * v2 + orthLength * orth2;
+            Vector3 center = mid2 * v2.normalized + orthLength2 * orth2;
             float newAngle = Mathf.Acos(Vector3.Dot((center - v2).normalized, (center - v3).normalized)); // angle between cp and cq
             float rad = (center - v2).magnitude;
             Vector3 cos = (center - v2).normalized;
@@ -107,14 +111,14 @@ public class HyperbolicTriangle : MonoBehaviour
 
             for (int i = 0; i < lengthPerLine; i++)
             {
-                //float angle_i = i * newAngle / (lengthPerLine - 1);
-                float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
+                float angle_i = i * newAngle / (lengthPerLine - 1);
+                //float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
                 Vector3 point_i = center - rad * (Mathf.Cos(angle_i) * cos + Mathf.Sin(angle_i) * sin);
                 points[i + lengthPerLine] = point_i;
             }
         }
 
-        if (angle3 == 0 | angle3 == Mathf.PI)
+        if (angle3 == 0 | angle3 == Mathf.PI | rho3 == 0 | rho1 == 0)
         {
             for (int i = 0; i < lengthPerLine; i++)
             {
@@ -125,13 +129,12 @@ public class HyperbolicTriangle : MonoBehaviour
         }
         else
         {
-            Vector3 mid31 = (v3 + v1) / 2; //midpoint of p and q
-            Vector3 orth3 = (mid31 - Vector3.Project(mid31, v3)).normalized; // vector normal to p in plane
-            float mid3 = 0.5f * (1 + Mathf.Pow(v3.magnitude, -2));//Midpoint of p and inversion of p
-            float mid1 = 0.5f * (1 + Mathf.Pow(v1.magnitude, -2));
-            float orthLength = Mathf.Abs(mid1 - mid3 * Mathf.Cos(angle3)) / Mathf.Sin(angle3);
+            Vector3 orth3 = (v1 - Vector3.Project(v1, v3)).normalized; // vector normal to p in plane
+            float mid3 = (1 + Mathf.Pow(rho3, 2)) / (2 * rho3);//Midpoint of p and inversion of p
+            float mid1 = (1 + Mathf.Pow(rho1, 2)) / (2 * rho1);
+            float orthLength3 = mid1 / Mathf.Sin(angle3) - mid3 / Mathf.Tan(angle3);
 
-            Vector3 center = mid3 * v3 + orthLength * orth3;
+            Vector3 center = mid3 * v3.normalized + orthLength3 * orth3;
             float newAngle = Mathf.Acos(Vector3.Dot((center - v3).normalized, (center - v1).normalized)); // angle between cp and cq
             float rad = (center - v3).magnitude;
             Vector3 cos = (center - v3).normalized;
@@ -139,12 +142,11 @@ public class HyperbolicTriangle : MonoBehaviour
 
             for (int i = 0; i < lengthPerLine; i++)
             {
-                //float angle_i = i * newAngle / (lengthPerLine - 1);
-                float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
+                float angle_i = i * newAngle / (lengthPerLine - 1);
+                //float angle_i = i * 2 * Mathf.PI / (lengthPerLine - 1);
                 Vector3 point_i = center - rad * (Mathf.Cos(angle_i) * cos + Mathf.Sin(angle_i) * sin);
                 points[i + 2 * lengthPerLine] = point_i;
             }
-
         }
 
         triangle.SetPositions(points);

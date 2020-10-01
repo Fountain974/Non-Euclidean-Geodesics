@@ -56,12 +56,12 @@ public class SphericalTriangle : MonoBehaviour
         for (int i = 0; i < lengthPerLine; i++)
         {
             float angle2_i = i * angle2 / (lengthPerLine - 1);
-            points[i + 1000] = rho * (Mathf.Sin(angle2_i) * w2 + Mathf.Cos(angle2_i) * v2);
+            points[i + lengthPerLine] = rho * (Mathf.Sin(angle2_i) * w2 + Mathf.Cos(angle2_i) * v2);
         }
         for (int i = 0; i < lengthPerLine; i++)
         {
             float angle3_i = i * angle3 / (lengthPerLine - 1);
-            points[i + 2000] = rho * (Mathf.Sin(angle3_i) * w3 + Mathf.Cos(angle3_i) * v3);
+            points[i + 2*lengthPerLine] = rho * (Mathf.Sin(angle3_i) * w3 + Mathf.Cos(angle3_i) * v3);
         }
 
         triangle.SetPositions(points);
